@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Treat App Login</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #1e90ff, #005bea);
+}
+
+.container {
+  width: 380px;
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+h2 {
+  text-align: center;
+  color: #1e90ff;
+  margin-bottom: 20px;
+}
+
+.input-box {
+  margin: 12px 0;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+}
+
+input:focus {
+  border-color: #1e90ff;
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.toggle {
+  position: absolute;
+  right: 10px;
+  top: 12px;
+  font-size: 12px;
+  color: #1e90ff;
+  cursor: pointer;
+}
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #1e90ff;
+  color: white;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.btn:hover {
+  background: #0066cc;
+}
+
+.register-btn {
+  background: #28a745;
+}
+
+.switch {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 13px;
+  cursor: pointer;
+  color: #1e90ff;
+}
+
+.message {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 13px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>🍽️ Treat App</h2>
+
+  <div class="input-box">
+    <input type="text" id="username" placeholder="Username"/>
+  </div>
+
+  <div class="input-box password-wrapper">
+    <input type="password" id="password" placeholder="Password"/>
+    <span class="toggle" onclick="togglePassword()">Show</span>
+  </div>
+
+  <button class="btn" onclick="loginUser()">Login</button>
+  <button class="btn register-btn" onclick="registerUser()">Register</button>
+
+  <div class="switch" onclick="clearFields()">
+    Clear fields
+  </div>
+
+  <div class="message" id="msg"></div>
+</div>
+
+<script>
+const API = "http://localhost:3000";
+
+function showMessage(text, color="black") {
+  const msg = document.getElementById("msg");
+  msg.innerText = text;
+  msg.style.color = color;
+}
+
+// Show / Hide password
+function togglePassword() {
+  const pass = document.getElementById("password");
+  const toggle = document.querySelector(".toggle");
+
+  if (pass.type === "password") {
+    pass.type = "text";
+    toggle.innerText = "Hide";
+  } else {
+    pass.type = "password";
+    toggle.innerText = "Show";
+  }
+}
+
+// LOGIN
+async function loginUser() {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+
+  if (!username || !password) {
+    showMessage("Please fill all fields", "red");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+
+    if (data.message === "Login successful") {
+      showMessage("Login Successful 🎉", "green");
+
+      // optional redirect
+      // window.location.href = "home.html";
+    } else {
+      showMessage(data.message, "red");
+    }
+  } catch (err) {
+    showMessage("Server not running", "red");
+  }
+}
+
+// REGISTER
+async function registerUser() {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+
+  if (!username || !password) {
+    showMessage("Please fill all fields", "red");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+
+    if (data.message.includes("success")) {
+      showMessage("Registered successfully 🎉", "green");
+    } else {
+      showMessage(data.message, "red");
+    }
+  } catch (err) {
+    showMessage("Server not running", "red");
+  }
+}
+
+// CLEAR FIELDS
+function clearFields() {
+  document.getElementById("username").value = "";
+  document.getElementById("password").value = "";
+  showMessage("");
+}
+</script>
+
+</body>
+</html>
